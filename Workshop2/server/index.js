@@ -1,22 +1,43 @@
 const express = require('express');
 const cors = require("cors");
+const bodyParser = require("body-parser");
+
 const app = express();
 
-
-// check for cors
+//middlewares
+app.use(bodyParser.json());
 app.use(cors({
   domains: '*',
-  methods: "*"
+  methods: '*'
 }));
 
+//routes
 app.get('/tipocambio', function (req, res) {
-  res.send(`{
-    "TipoCompraDolares" : "608",
-    "TipoVentaDolares" : "621",
-    "TipoCompraEuros" : "731.85",
-    "TipoVentaEuros" : "761.9"
-  }`);
+  let response = {};
+  switch(req.query.type) {
+    case 'usd':
+      response = {
+        "TipoCompraDolares" : "621",
+        "TipoVentaDolares" : "621"
+      }
+    break;
+    case 'eur':
+      response = {
+        "TipoCompraEuros" : "731.85",
+        "TipoVentaEuros" : "761.9"
+      }
+    break;
+    default:
+      response = {
+        "TipoCompraDolares" : "621",
+        "TipoVentaDolares" : "621",
+        "TipoCompraEuros" : "731.85",
+        "TipoVentaEuros" : "761.9"
+      }
+    break;
+  }
+  res.json(response);
 });
 
-
-app.listen(3000, () => console.log(`Example app listening on port 3000!`))
+//start the app
+app.listen(3000, () => console.log(`BBCR Exchange type service listening on port 3001!`))
