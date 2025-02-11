@@ -8,7 +8,7 @@ const Teacher = require("../models/teacherModel");
  */
 const teacherCreate = (req, res) => {
   console.log("Received request body:", req.body);
-  
+
   let teacher = new Teacher();
 
   teacher.first_name = req.body.first_name;
@@ -31,7 +31,7 @@ const teacherCreate = (req, res) => {
         res.json({
           error: 'There was an error saving the teacher'
         });
-    });
+      });
   } else {
     res.status(422);
     console.log('error while saving the teacher')
@@ -52,13 +52,13 @@ const teacherGet = (req, res) => {
   if (req.query && req.query.id) {
     Teacher.findById(req.query.id)
       .then(teacher => {
-        if(teacher) {
+        if (teacher) {
           res.json(teacher);
         }
         res.status(404);
         res.json({ error: "Teacher doesnt exist" })
       })
-      .catch( (err) => {
+      .catch((err) => {
         res.status(500);
         console.log('error while queryting the teacher', err)
         res.json({ error: "There was an error" })
@@ -81,22 +81,44 @@ const teacherGet = (req, res) => {
  * @param {*} res 
  * @returns 
  */
-const teacherUpdate = async(req, res) => {
-  try{
-    const {id} = req.params;
-    const updateData = req.body;
+const teacherUpdate = (req, res) => {
+  if (req.query && req.query.id) {
+    Teacher.findById(req.query.id)
+      .then(teacher => {
+        if (teacher) {
+          // Update the teacher fields
+          teacher.first_name = req.body.first_name || teacher.first_name;
+          teacher.last_name = req.body.last_name || teacher.last_name;
+          teacher.cedula = req.body.cedula || teacher.cedula;
+          teacher.age = req.body.age || teacher.age;
 
-    const teacher = await Teacher.findByIdAndUpdate(id, updateData, {new: true});
-
-    if(!teacher){
-      return res.status(404).json({error: "Teacher not found"});
-    }
-    res.json(teacher);
-  }catch (error){
-    console.error("Error updating teacher: ", error);
-    res.status(500).json({error: "There was an error updating the teacher"});
+          teacher.save()
+            .then(() => {
+              res.json(teacher);
+            })
+            .catch((err) => {
+              res.status(422);
+              console.log('error while updating the teacher', err);
+              res.json({
+                error: 'There was an error updating the teacher'
+              });
+            });
+        } else {
+          res.status(404);
+          res.json({ error: 'Teacher doesn\'t exist' });
+        }
+      })
+      .catch((err) => {
+        res.status(500);
+        console.log('error while querying the teacher', err);
+        res.json({ error: 'There was an error' });
+      });
+  } else {
+    res.status(422);
+    res.json({ error: 'No valid ID provided for teacher' });
   }
 };
+
 
 /**
  * Delet teacher by ID
@@ -104,19 +126,26 @@ const teacherUpdate = async(req, res) => {
  * @param {*} res 
  * @returns 
  */
-const teacherDelete = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const teacher = await Teacher.findByIdAndDelete(id);
-
-    if (!teacher) {
-      return res.status(404).json({ error: "Teacher not found" });
-    }
-    res.status(201); // Deleted
-  } catch (error) {
-    console.error("Error deleting teacher:", error);
-    res.status(500).json({ error: "There was an error deleting the teacher" });
-  }
+const teacherDelete = (req, res) => {
+  if (req.query && req.query.id) {
+    Teacher.findByIdAndDelete(req.query.id)
+      .then(teacher => {
+        if (teacher) {
+          res.json({ message: 'Teacher successfully deleted' });
+        } else {
+          res.status(404);
+          res.json({ error: 'Teacher doesn\'t exist' });
+        }
+      })
+      .catch((err) => {
+        res.status(500);
+        console.log('error while querying the teacher', err);
+        res.json({ error: 'There was an error' });
+      });
+  } else {
+    res.status(422);
+    res.json({ error: 'No valid ID provided for teacher' })
+  };
 };
 
 module.exports = {
