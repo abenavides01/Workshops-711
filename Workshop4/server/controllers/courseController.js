@@ -32,29 +32,23 @@ const coursePost = async (req, res) => {
  * @param {*} res
  */
 const courseGet = (req, res) => {
-  // if an specific teacher is required
-  if (req.query && req.query.id) {
-    Course.findById(req.query.id).populate('teacher')
-      .then( (course) => {
-        res.json(course);
-      })
-      .catch(err => {
-        res.status(404);
-        console.log('error while queryting the course', err)
-        res.json({ error: "Course doesnt exist" })
-      });
-  } else {
-    // get all teachers
-    Course.find().populate('teacher')
-      .then( courses => {
-        res.json(courses);
-      })
-      .catch(err => {
-        res.status(422);
-        res.json({ "error": err });
-      });
-  }
+  // Si hay un parámetro teacher en la consulta, filtra los cursos por ese teacher._id
+  const teacherId = req.query.teacher;
+
+  // Si no hay filtro, trae todos los cursos
+  const query = teacherId ? { teacher: teacherId } : {};
+
+  Course.find(query)
+    .populate('teacher', 'first_name last_name') // Solo trae los campos first_name y last_name
+    .then(courses => {
+      res.json(courses);
+    })
+    .catch(err => {
+      console.error("Error fetching courses:", err.message);
+      res.status(422).json({ error: `Could not fetch courses: ${err.message}` });
+    });
 };
+
 
 /**
  * Update a course
@@ -63,7 +57,8 @@ const courseGet = (req, res) => {
  * @param {*} res
  */
 const courseUpdate = async (req, res) => {
-  const { id, name, credits, teacher } = req.body;
+  const { name, credits, teacher } = req.body;
+  const { id } = req.params;  // Obtenemos el id de los parámetros de la URL
 
   // Verifica si se recibe el ID
   if (!id) {
@@ -83,6 +78,7 @@ const courseUpdate = async (req, res) => {
     res.status(422).json({ error: 'Error updating the course', details: err });
   }
 };
+
 
 /**
  * Delete a course

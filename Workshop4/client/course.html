@@ -14,8 +14,14 @@
         <form id="courseForm" class="mb-4">
             <input type="hidden" id="courseId">
             <div class="mb-3">
-                <label class="form-label">Course Name</label>
-                <input type="text" class="form-control" id="courseName" required>
+                <label class="form-label">Course</label>
+                <select class="form-select" id="name" name="name">
+                    <option value="">Select course</option>
+                    <option value="ISW-711">Software Engineering II</option>
+                    <option value="ISW-712">Programming in Web Environment II</option>
+                    <option value="ISW-913">Operations Research</option>
+                    <option value="ID-TEC-06">English VI</option>
+                </select>
             </div>
             <div class="mb-3">
                 <label class="form-label">Credits</label>
@@ -35,7 +41,7 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Course Name</th>
+                    <th>Course ID</th>
                     <th>Credits</th>
                     <th>Teacher</th>
                     <th>Actions</th>

@@ -15,7 +15,6 @@ const teacherCreate = (req, res) => {
   teacher.last_name = req.body.last_name;
   teacher.age = req.body.age;
   teacher.cedula = req.body.cedula;
-  teacher.course = req.body.course;
 
   if (teacher.first_name && teacher.last_name) {
     teacher.save()
@@ -92,7 +91,6 @@ const teacherUpdate = (req, res) => {
           teacher.last_name = req.body.last_name || teacher.last_name;
           teacher.cedula = req.body.cedula || teacher.cedula;
           teacher.age = req.body.age || teacher.age;
-          teacher.course = req.body.course || teacher.course;
 
           teacher.save()
             .then(() => {

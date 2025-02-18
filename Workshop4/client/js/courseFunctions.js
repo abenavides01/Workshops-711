@@ -6,13 +6,17 @@ function fetchCourses() {
             const table = document.getElementById("courseList");
             table.innerHTML = ""; // Clear existing table rows
             courses.forEach(course => {
+                // Verifica si el campo teacher está correctamente poblado
+                const teacherName = course.teacher ? `${course.teacher.first_name} ${course.teacher.last_name}` : "No teacher assigned";
+                const teacherId = course.teacher ? course.teacher._id : "";
+
                 table.innerHTML += `
                     <tr>
                         <td>${course.name}</td>
                         <td>${course.credits}</td>
-                        <td>${course.teacher ? course.teacher.name : "No teacher assigned"}</td>
+                        <td>${teacherName}</td>
                         <td>
-                            <button class="btn btn-warning btn-sm" onclick="editCourse('${course._id}', '${course.name}', ${course.credits}, '${course.teacher ? course.teacher._id : ""}')">Edit</button>
+                            <button class="btn btn-warning btn-sm" onclick="editCourse('${course._id}', '${course.name}', ${course.credits}, '${teacherId}')">Edit</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteCourse('${course._id}')">Delete</button>
                         </td>
                     </tr>`;
@@ -40,53 +44,70 @@ function fetchTeachers() {
 
 // Handle form submission for creating/updating courses
 function handleFormSubmit(event) {
-    event.preventDefault(); // Prevent page refresh
-    const id = document.getElementById("courseId").value;
+    event.preventDefault();
+
     const courseData = {
-        name: document.getElementById("courseName").value,
+        name: document.getElementById("course").value,
         credits: document.getElementById("credits").value,
-        teacher: document.getElementById("teacherSelect").value
+        teacher: document.getElementById("teacherSelect").value // Aquí es donde se obtiene el ID del profesor
     };
 
-    // If an ID exists, it's an update
-    if (id) {
-        fetch(`http://localhost:3001/courses?id=${id}`, {
+    // Si hay un ID, entonces es una actualización, si no es un curso nuevo
+    const courseId = document.getElementById("courseId").value;
+
+    if (courseId) {
+        // PUT para actualizar el curso
+        fetch(`http://localhost:3001/courses/${courseId}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify(courseData)
         }).then(fetchCourses);
     } else {
-        // If no ID, it's a new course
+        // POST para crear un nuevo curso
         fetch("http://localhost:3001/courses", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify(courseData)
-        }).then(fetchCourses);
-    }
-    event.target.reset(); // Reset form fields
-}
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Course created:', data);
+                fetchCourses(); // Refresh course list
+            })
+            .catch(err => {
+                console.error("Error creating course:", err);
+            });
 
-// Edit course
-function editCourse(id, name, credits, teacherId) {
-    document.getElementById("courseId").value = id;
-    document.getElementById("courseName").value = name;
-    document.getElementById("credits").value = credits;
-    document.getElementById("teacherSelect").value = teacherId;
-}
-
-// Delete course
-function deleteCourse(id) {
-    if (confirm("Are you sure you want to delete this course?")) {
-        fetch(`http://localhost:3001/courses?id=${id}`, { method: "DELETE" })
-            .then(fetchCourses); // Refresh the course list
+        event.target.reset();
     }
 }
 
-// Attach event listener for form submission
-document.getElementById("courseForm").addEventListener("submit", handleFormSubmit);
 
-// Call the functions on page load
-document.addEventListener("DOMContentLoaded", () => {
-    fetchCourses(); // Fetch courses and teachers when the page loads
-    fetchTeachers(); // Fetch teachers to populate the course form
-});
+    // Edit course
+    function editCourse(id, name, credits, teacherId) {
+        document.getElementById("courseId").value = id;
+        document.getElementById("name").value = name;
+        document.getElementById("credits").value = credits;
+        document.getElementById("teacherSelect").value = teacherId;
+    }
+
+    // Delete course
+    function deleteCourse(id) {
+        if (confirm("Are you sure you want to delete this course?")) {
+            fetch(`http://localhost:3001/courses?id=${id}`, { method: "DELETE" })
+                .then(fetchCourses); // Refresh the course list
+        }
+    }
+
+    // Attach event listener for form submission
+    document.getElementById("courseForm").addEventListener("submit", handleFormSubmit);
+
+    // Call the functions on page load
+    document.addEventListener("DOMContentLoaded", () => {
+        fetchCourses(); // Fetch courses and teachers when the page loads
+        fetchTeachers(); // Fetch teachers to populate the course form
+    });

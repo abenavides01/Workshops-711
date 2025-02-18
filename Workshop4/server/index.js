@@ -25,8 +25,8 @@ app.delete("/teachers", teacherDelete);
 
 //Rutas para los cursos
 app.post('/courses', coursePost);
-app.get('/course', courseGet);
-app.put('/course', courseUpdate);
-app.delete('/course', courseDelete);
+app.get('/courses', courseGet);
+app.put('/courses/:id', courseUpdate);
+app.delete('/courses', courseDelete);
 
 app.listen(3001, () => console.log(`Example app listening on port 3001!`));
