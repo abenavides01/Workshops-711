@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Teacher Management</h2>
+        
+        <!-- Formulario para agregar y actualizar profesor -->
+        <form id="teacherForm" class="mb-4">
+            <input type="hidden" id="teacherId">
+            <div class="mb-3">
+                <label class="form-label">First Name</label>
+                <input type="text" class="form-control" id="firstName" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="lastName" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">ID</label>
+                <input type="text" class="form-control" id="cedula" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Age</label>
+                <input type="number" class="form-control" id="age" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Course</label>
+                <select class="form-select" id="course" name="course">
+                    <option value="">Select course</option>
+                    <option value="ISW-711">Software Engineering II</option>
+                    <option value="ISW-712">Programming in Web Environment II</option>
+                    <option value="ISW-913">Operations Research</option>
+                    <option value="ID-TEC-06">English VI</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+
+        <!-- Tabla para mostrar los profesores -->
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Cedula</th>
+                    <th>Age</th>
+                    <th>Course</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="teacherList"></tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", fetchTeachers);//Ejecuta 'fetchTeacher' cuando el documento está listo
+        document.getElementById("teacherForm").addEventListener("submit", handleFormSubmit);//Ejecuta 'handleFormSubmit' cuando el formulario se envia
+
+        /*
+        *Obtener teachers
+        */
+        function fetchTeachers() {
+            fetch("http://localhost:3001/teachers")//hace un GET al localhost
+                .then(response => response.json())//convierte la respuesta a JSON
+                .then(data => {
+                    const table = document.getElementById("teacherList");
+                    table.innerHTML = "";
+                    data.forEach(teacher => {
+                        //'innerHTML' agrega una nueva fila a la tabla
+                        table.innerHTML += `
+                            <tr>
+                                <td>${teacher.first_name}</td>
+                                <td>${teacher.last_name}</td>
+                                <td>${teacher.cedula}</td>
+                                <td>${teacher.age}</td>
+                                <td>${teacher.course}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm" onclick="editTeacher('${teacher._id}', '${teacher.first_name}', '${teacher.last_name}', '${teacher.cedula}', ${teacher.age}, '${teacher.course}')">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteTeacher('${teacher._id}')">Delete</button>
+                                </td>
+                            </tr>`;
+                    });
+                });
+        }
+
+        /*
+        *Manejo de formulario
+        */
+        function handleFormSubmit(event) {
+            event.preventDefault();//previene que se recargue la página
+            const id = document.getElementById("teacherId").value;//Obtiene el id
+            const teacherData = {
+                first_name: document.getElementById("firstName").value,
+                last_name: document.getElementById("lastName").value,
+                cedula: document.getElementById("cedula").value,
+                age: document.getElementById("age").value,
+                course: document.getElementById("course").value
+            };
+
+            //Valida si el formulario tiene el ID obtenido y realiza el PUT
+            if (id) {
+                fetch(`http://localhost:3001/teachers?id=${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(teacherData)
+                }).then(fetchTeachers);
+            } 
+            //Si no tiene el ID significa que es un nuevo teacher y hace un POST
+            else {
+                fetch("http://localhost:3001/teachers", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(teacherData)
+                }).then(fetchTeachers);//Vuelve a cargar la lista de Teachers y los muestra en la tabla
+            }
+            event.target.reset();//limpia el formulario luego de guardar los cambios
+        }
+
+        /*
+        *Editar teacher
+        * es llamado con el botón 'Edit'
+        */
+        function editTeacher(id, firstName, lastName, cedula, age) {
+          //obtiene los datos por medio del ID y los actualiza
+            document.getElementById("teacherId").value = id;
+            document.getElementById("firstName").value = firstName;
+            document.getElementById("lastName").value = lastName;
+            document.getElementById("cedula").value = cedula;
+            document.getElementById("age").value = age;
+            document.getElementById("course").value = course;
+        }
+
+        /*
+        *Eliminar teacher
+        */
+        function deleteTeacher(id) {
+          // muestra mensaje de confirmación para eliminar los datos, si se confirma se elimina el ID especificado
+            if (confirm("Are you sure you want to delete this teacher?")) {
+                fetch(`http://localhost:3001/teachers?id=${id}`, { method: "DELETE" })
+                    .then(fetchTeachers);//actualiza la lista de teacher de la tabla
+            }
+        }
+    </script>
+</body>
+</html>

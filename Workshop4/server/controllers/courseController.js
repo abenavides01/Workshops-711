@@ -56,7 +56,65 @@ const courseGet = (req, res) => {
   }
 };
 
+/**
+ * Update a course
+ *
+ * @param {*} req
+ * @param {*} res
+ */
+const courseUpdate = async (req, res) => {
+  const { id, name, credits, teacher } = req.body;
+
+  // Verifica si se recibe el ID
+  if (!id) {
+    return res.status(400).json({ error: 'Course ID is required' });
+  }
+
+  try {
+    // Actualiza el curso según el ID
+    const updatedCourse = await Course.findByIdAndUpdate(id, { name, credits, teacher }, { new: true });
+
+    if (!updatedCourse) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    res.json(updatedCourse); // Devuelve el curso actualizado
+  } catch (err) {
+    res.status(422).json({ error: 'Error updating the course', details: err });
+  }
+};
+
+/**
+ * Delete a course
+ *
+ * @param {*} req
+ * @param {*} res
+ */
+const courseDelete = async (req, res) => {
+  const { id } = req.query;
+
+  // Verifica si se recibe el ID
+  if (!id) {
+    return res.status(400).json({ error: 'Course ID is required' });
+  }
+
+  try {
+    const course = await Course.findByIdAndDelete(id);
+
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    res.json({ message: 'Course successfully deleted' });
+  } catch (err) {
+    res.status(422).json({ error: 'Error deleting the course', details: err });
+  }
+};
+
+
 module.exports = {
   coursePost,
-  courseGet
+  courseGet,
+  courseUpdate,
+  courseDelete
 }
