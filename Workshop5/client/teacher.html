@@ -9,6 +9,9 @@
 </head>
 
 <body>
+    <!-- El layout se cargará aquí -->
+    <div id="layout-placeholder"></div>
+
     <div class="container mt-5">
         <h2 class="text-center">Teacher Management</h2>
 
@@ -146,6 +149,25 @@
                     .then(fetchTeachers);//actualiza la lista de teacher de la tabla
             }
         }
+
+        // Función para cargar el layout
+        function loadLayout() {
+            fetch('layout.html') // Ruta al archivo layout.html
+                .then(response => response.text())
+                .then(data => {
+                    // Inserta el contenido del layout en el placeholder
+                    document.getElementById('layout-placeholder').innerHTML = data;
+                })
+                .catch(error => {
+                    console.error('Error cargando el layout:', error);
+                });
+        }
+
+        // Cargar el layout cuando la página se cargue
+        window.onload = function() {
+            loadLayout();
+        }
+    
     </script>
 </body>
 
