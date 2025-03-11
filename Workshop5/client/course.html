@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Course Management</h2>
+
+        <!-- Formulario para agregar y actualizar curso -->
+        <form id="courseForm" class="mb-4">
+            <input type="hidden" id="courseId">
+            <div class="mb-3">
+                <label class="form-label">Course</label>
+                <select class="form-select" id="name" name="name">
+                    <option value="">Select course</option>
+                    <option value="ISW-711">Software Engineering II</option>
+                    <option value="ISW-712">Programming in Web Environment II</option>
+                    <option value="ISW-913">Operations Research</option>
+                    <option value="ID-TEC-06">English VI</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Credits</label>
+                <input type="number" class="form-control" id="credits" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Teacher</label>
+                <select class="form-select" id="teacherSelect" name="teacher">
+                    <option value="">Select teacher</option>
+                    <!-- Teachers will be populated here via JavaScript -->
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+
+        <!-- Tabla para mostrar los cursos -->
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Course ID</th>
+                    <th>Credits</th>
+                    <th>Teacher</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="courseList"></tbody>
+        </table>
+    </div>
+
+    <!-- Vincular el archivo JavaScript -->
+    <script src="js/courseFunctions.js"></script>
+</body>
+</html>
